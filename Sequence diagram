@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor User as 利用者
+    participant UI as アプリ画面
+    participant System as システム・カート
+    participant QRGen as QRコード生成モジュール
+
+    User->>UI: 商品一覧へのアクセス
+    UI->>System: 商品データ取得リクエスト
+    System-->>UI: カタログデータ返却
+    UI-->>User: 商品一覧表示
+    
+    User->>UI: 商品とオプションを選択し追加
+    UI->>System: カートにデータを追加
+    System-->>UI: 最新のカート状態と合計金額
+    UI-->>User: カート画面の更新表示
+    
+    User->>UI: 購入確定・QR生成ボタン押下
+    UI->>QRGen: カートデータ送信
+    QRGen-->>UI: QRコード画像データ返却
+    UI-->>User: QRコードの画面表示

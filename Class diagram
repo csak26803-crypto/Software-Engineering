@@ -1,0 +1,28 @@
+classDiagram
+    class Ticket {
+        +String ticketId
+        +String name
+        +int price
+        +String description
+    }
+    class CartItem {
+        +Ticket ticket
+        +int quantity
+        +String option
+        +getSubTotal() int
+    }
+    class Cart {
+        +List~CartItem~ items
+        +int totalAmount
+        +addItem(ticket, qty, option)
+        +removeItem(ticketId)
+        +calculateTotal() int
+    }
+    class QRCodeGenerator {
+        +String formatData
+        +generateQR(Cart) Image
+    }
+
+    Cart "1" *-- "*" CartItem : contains
+    CartItem "1" o-- "1" Ticket : refers to
+    QRCodeGenerator ..> Cart : uses
