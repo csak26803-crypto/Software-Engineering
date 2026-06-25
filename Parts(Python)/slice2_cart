@@ -1,0 +1,58 @@
+# slice2_cart.py
+import json
+from slice1_catalog import CATALOG, display_catalog
+
+class Cart:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, ticket_id, quantity, option="なし"):
+        """【入力・処理】商品をカートに追加し、小計を計算する"""
+        if ticket_id in CATALOG:
+            ticket = CATALOG[ticket_id]
+            subtotal = ticket["price"] * quantity
+            self.items.append({
+                "ticket_id": ticket_id,
+                "name": ticket["name"],
+                "price": ticket["price"],
+                "quantity": quantity,
+                "option": option,
+                "subtotal": subtotal
+            })
+            print(f" -> {ticket['name']}を{quantity}枚追加しました。（小計: ¥{subtotal}）")
+        else:
+            print(f"エラー: 商品ID '{ticket_id}' は存在しません。")
+
+    def get_total(self):
+        """【処理】カート内の合計金額を計算する"""
+        return sum(item["subtotal"] for item in self.items)
+
+    def display_cart(self):
+        """【表示】現在のカートの中身と合計金額を表示する"""
+        print("\n=== 現在のカート内容 ===")
+        if not self.items:
+            print("カートは空です。")
+            return
+        
+        for i, item in enumerate(self.items, 1):
+            print(f"{i}. {item['name']} x{item['quantity']} (OP:{item['option']}) - ¥{item['subtotal']}")
+        print(f"【合計金額】: ¥{self.get_total()}")
+        print("========================\n")
+
+    def export_data(self):
+        """【保存用のデータ出力】カート状態をJSON文字列に変換する"""
+        data = {
+            "items": self.items,
+            "total_amount": self.get_total()
+        }
+        return json.dumps(data, ensure_ascii=False)
+
+if __name__ == "__main__":
+    # 縦切り2の動作確認
+    display_catalog() # Slice1の機能を利用
+    
+    my_cart = Cart()
+    my_cart.add_item("T001", 2, "パンフレット付き")
+    my_cart.add_item("T002", 1)
+    
+    my_cart.display_cart()

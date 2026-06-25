@@ -1,0 +1,36 @@
+# slice3_qrcode.py
+import qrcode
+from slice2_cart import Cart
+
+def generate_qr_from_json(json_data, output_filename="ticket_qr.png"):
+    """【処理・出力】JSON文字列を受け取り、QRコード画像を生成する"""
+    print("QRコードを生成中...")
+    
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(json_data)
+    qr.make(fit=True)
+    
+    # 画像として保存
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save(output_filename)
+    print(f" -> QRコード画像を '{output_filename}' として保存しました。")
+
+if __name__ == "__main__":
+    # 縦切り3の動作確認（Slice1, 2の機能を通して最終データを作る）
+    print("1. カートに商品を追加し、注文データを確定します。")
+    final_cart = Cart()
+    final_cart.add_item("T003", 2) # シニアチケット2枚
+    final_cart.display_cart()
+    
+    # 確定データの出力
+    order_json = final_cart.export_data()
+    print("【生成された注文データ(JSON)】")
+    print(order_json)
+    
+    print("\n2. 注文データからQRコードを生成します。")
+    generate_qr_from_json(order_json, "final_ticket_qr.png")

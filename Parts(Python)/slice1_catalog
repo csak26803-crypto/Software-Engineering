@@ -1,0 +1,19 @@
+# slice1_catalog.py
+
+# データベースの代わりとなる商品データ
+CATALOG = {
+    "T001": {"name": "大人チケット", "price": 2000, "desc": "18歳以上対象"},
+    "T002": {"name": "子供チケット", "price": 1000, "desc": "小学生〜高校生対象"},
+    "T003": {"name": "シニアチケット", "price": 1500, "desc": "65歳以上対象"}
+}
+
+def display_catalog():
+    """【処理・表示】商品一覧を取得して表示する"""
+    print("=== 商品カタログ ===")
+    for ticket_id, info in CATALOG.items():
+        print(f"[{ticket_id}] {info['name']} - ¥{info['price']} ({info['desc']})")
+    print("===================\n")
+
+if __name__ == "__main__":
+    # 縦切り1の動作確認
+    display_catalog()
