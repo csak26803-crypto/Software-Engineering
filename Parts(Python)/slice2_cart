@@ -76,19 +76,3 @@ if __name__ == "__main__":
     display_catalog() 
     
     cart = Cart()
-    
-    # 1. まずは多めに追加してみる
-    cart.add_item("T001", 3)  # 大人チケット3枚
-    cart.add_item("T002", 2)  # 子供チケット2枚
-    cart.display_cart()
-    
-    # 2. 任意の数を減らすテスト (remove_item)
-    print("--- 数量を減らすテスト ---")
-    cart.remove_item("T001", 1)  # 大人チケットを1枚減らす（残り2枚になる）
-    cart.remove_item("T002", 2)  # 子供チケットを2枚減らす（カートから消える）
-    cart.display_cart()
-    
-    # 3. カートを空にするテスト (clear_cart)
-    print("--- カートを空にするテスト ---")
-    cart.clear_cart()
-    cart.display_cart()
