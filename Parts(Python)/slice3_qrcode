@@ -1,10 +1,22 @@
 # slice3_qrcode.py
+import os  # 💡 フォルダ操作のために追加
 import qrcode
 from slice2_cart import Cart
 
 def generate_qr_from_json(json_data, output_filename="ticket_qr.png"):
     """【処理・出力】JSON文字列を受け取り、QRコード画像を生成する"""
     print("QRコードを生成中...")
+    
+    # 💡 【追加】保存先のフォルダ名
+    folder_name = "QRcodefolder"
+    
+    # 💡 【追加】もしフォルダが存在していなければ、自動で新しく作成する
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+        print(f" -> フォルダ '{folder_name}' を作成しました。")
+        
+    # 💡 【追加】フォルダ名とファイル名を合体させる（例: QRcodefolder/final_ticket_qr.png）
+    save_path = os.path.join(folder_name, output_filename)
     
     qr = qrcode.QRCode(
         version=1,
@@ -17,8 +29,8 @@ def generate_qr_from_json(json_data, output_filename="ticket_qr.png"):
     
     # 画像として保存
     img = qr.make_image(fill_color="black", back_color="white")
-    img.save(output_filename)
-    print(f" -> QRコード画像を '{output_filename}' として保存しました。")
+    img.save(save_path)  # 💡 保存先をフォルダの中に変更！
+    print(f" -> QRコード画像を '{save_path}' として保存しました。")
 
 if __name__ == "__main__":
     # 縦切り3の動作確認（Slice1, 2の機能を通して最終データを作る）
