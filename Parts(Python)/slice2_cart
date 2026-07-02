@@ -23,6 +23,30 @@ class Cart:
         else:
             print(f"エラー: 商品ID '{ticket_id}' は存在しません。")
 
+    def remove_item(self, ticket_id, quantity):
+        """【追加機能】指定した商品IDの数量を、任意の数だけ減らす"""
+        # カート内から指定された商品IDを探す
+        for item in self.items:
+            if item["ticket_id"] == ticket_id:
+                if item["quantity"] > quantity:
+                    # 指定された数よりカート内の残りが多い場合：数量と小計を減らす
+                    item["quantity"] -= quantity
+                    item["subtotal"] = item["price"] * item["quantity"]
+                    print(f" -> {item['name']}を{quantity}枚減らしました。")
+                else:
+                    # カート内の数と同じか、それ以上減らそうとした場合：完全に削除
+                    self.items.remove(item)
+                    print(f" -> {item['name']}がカートから完全になくなりました。")
+                return
+        
+        # カートにその商品が入っていなかった場合
+        print(f"エラー: カート内に商品ID '{ticket_id}' は見つかりません。")
+
+    def clear_cart(self):
+        """【追加機能】カートの中身をすべて空にする"""
+        self.items = []
+        print(" -> カートの中身をすべてクリアしました。")
+
     def get_total(self):
         """【処理】カート内の合計金額を計算する"""
         return sum(item["subtotal"] for item in self.items)
@@ -49,10 +73,22 @@ class Cart:
 
 if __name__ == "__main__":
     # 縦切り2の動作確認
-    display_catalog() # Slice1の機能を利用
+    display_catalog() 
     
-    my_cart = Cart()
-    my_cart.add_item("T001", 2, "パンフレット付き")
-    my_cart.add_item("T002", 1)
+    cart = Cart()
     
-    my_cart.display_cart()
+    # 1. まずは多めに追加してみる
+    cart.add_item("T001", 3)  # 大人チケット3枚
+    cart.add_item("T002", 2)  # 子供チケット2枚
+    cart.display_cart()
+    
+    # 2. 任意の数を減らすテスト (remove_item)
+    print("--- 数量を減らすテスト ---")
+    cart.remove_item("T001", 1)  # 大人チケットを1枚減らす（残り2枚になる）
+    cart.remove_item("T002", 2)  # 子供チケットを2枚減らす（カートから消える）
+    cart.display_cart()
+    
+    # 3. カートを空にするテスト (clear_cart)
+    print("--- カートを空にするテスト ---")
+    cart.clear_cart()
+    cart.display_cart()
