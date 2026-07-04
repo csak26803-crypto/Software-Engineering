@@ -5,7 +5,12 @@ CATALOG = {
     "T003": {"name": "シニアチケット", "price": 1500, "desc": "65歳以上対象"}
 }
 
-# 2. 並び替え機能を追加した表示関数
+# 2. 【ここがポイント！】大文字のデータを自動的に小文字のIDにも紐付け（同期）します
+CATALOG["t001"] = CATALOG["T001"]
+CATALOG["t002"] = CATALOG["T002"]
+CATALOG["t003"] = CATALOG["T003"]
+
+# 3. 並び替え機能を追加した表示関数
 def display_catalog():
     print("=== 商品カタログ ===")
     
@@ -15,10 +20,3 @@ def display_catalog():
     for ticket_id, info in sorted_items:
         print(f"[{ticket_id}] {info['name']} - ¥{info['price']} ({info['desc']})")
     print("===================")
-
-
-# 3. データを書き換えて実行する
-CATALOG["t001"] = CATALOG.pop("T001")
-
-# 4. 表示して確認（t001 が一番上に来るはずです！）
-display_catalog()
