@@ -35,12 +35,12 @@ def generate_qr_from_json(json_data, output_filename="ticket_qr.png"):
 if __name__ == "__main__":
     # 縦切り3の動作確認（Slice1, 2の機能を通して最終データを作る）
     print("1. カートに商品を追加し、注文データを確定します。")
-    final_cart = Cart()
-    final_cart.add_item("T003", 2) # シニアチケット2枚
-    final_cart.display_cart()
+    cart = Cart()
+    cart.add_item("T003", 2) # シニアチケット2枚
+    cart.display_cart()
     
     # 確定データの出力
-    order_json = final_cart.export_data()
+    order_json = cart.export_data()
     print("【生成された注文データ(JSON)】")
     print(order_json)
     
