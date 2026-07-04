@@ -1,0 +1,34 @@
+flowchart LR
+    %% アクターの定義
+    User((利用者\nユーザー))
+
+    %% システム境界
+    subgraph Ticket_Cart_System [チケットカートシステム]
+        direction TB
+        UC1([商品カタログを閲覧する\ndisplay_catalog])
+        
+        UC2([商品をカートに追加する\nadd_item])
+        UC3([カートの数量変更・削除\nremove_item])
+        UC4([カートを全クリアする\nclear_cart])
+        UC5([カート内容と合計を確認\ndisplay_cart])
+        
+        UC6([QRコードチケットを発行する\ngenerate_qr_from_json])
+        UC7([JSONデータを出力する\nexport_data])
+        UC8([保存フォルダを自動作成する\nos.makedirs])
+    end
+
+    %% アクターとユースケースの関連
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+
+    %% ユースケース間の関係（Include：包含）
+    UC6 -. "<< include >>" .-> UC7
+    UC6 -. "<< include >>" .-> UC8
+
+    %% スタイル設定
+    classDef usecase fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8 usecase;
