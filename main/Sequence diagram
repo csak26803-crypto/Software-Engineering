@@ -1,20 +1,38 @@
 sequenceDiagram
-    actor User as 利用者
-    participant UI as アプリ画面
-    participant System as システム・カート
-    participant QRGen as QRコード生成モジュール
+    actor User as 利用者 (Mainスクリプト)
+    participant Catalog as slice1_catalog
+    participant Cart as slice2_cart (Cart)
+    participant QRGen as slice3_qrcode
+    participant OS as ファイルシステム (OS)
 
-    User->>UI: 商品一覧へのアクセス
-    UI->>System: 商品データ取得リクエスト
-    System-->>UI: カタログデータ返却
-    UI-->>User: 商品一覧表示
+    %% カタログ表示フロー
+    User->>Catalog: display_catalog() を呼び出し
+    Note right of Catalog: CATALOG辞書を小文字基準で<br>ソートしてループ処理
+    Catalog-->>User: 商品一覧をコンソール表示 (print)
     
-    User->>UI: 商品とオプションを選択し追加
-    UI->>System: カートにデータを追加
-    System-->>UI: 最新のカート状態と合計金額
-    UI-->>User: カート画面の更新表示
+    %% カートへの追加フロー
+    User->>Cart: add_item("T001", 2, "なし") を呼び出し
+    Cart->>Catalog: CATALOG内にIDが存在するか確認
+    Catalog-->>Cart: 商品情報（価格など）を取得
+    Note right of Cart: self.itemsに辞書を追加し<br>小計(subtotal)を計算
+    Cart-->>User: 追加完了メッセージをコンソール表示 (print)
     
-    User->>UI: 購入確定・QR生成ボタン押下
-    UI->>QRGen: カートデータ送信
-    QRGen-->>UI: QRコード画像データ返却
-    UI-->>User: QRコードの画面表示
+    %% カート内容の確認フロー
+    User->>Cart: display_cart() を呼び出し
+    Cart->>Cart: get_total() で合計金額を計算
+    Cart-->>User: カート一覧と合計金額をコンソール表示 (print)
+    
+    %% データエクスポートとQR生成フロー
+    User->>Cart: export_data() を呼び出し
+    Note right of Cart: 日本語対応で<br>json.dumps()を実行
+    Cart-->>User: json_data (JSON形式の文字列) を返却
+    
+    User->>QRGen: generate_qr_from_json(json_data, "ticket_qr.png") を呼び出し
+    QRGen->>OS: os.path.exists("QRcodefolder") でフォルダ確認
+    alt フォルダが存在しない場合
+        QRGen->>OS: os.makedirs("QRcodefolder") で新規作成
+    end
+    
+    Note right of QRGen: qrcodeモジュールで<br>画像データをメモリ上に生成
+    QRGen->>OS: img.save("QRcodefolder/ticket_qr.png") で保存
+    QRGen-->>User: 保存完了メッセージをコンソール表示 (print)
