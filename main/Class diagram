@@ -1,28 +1,36 @@
 classDiagram
-    class Ticket {
-        +String ticketId
-        +String name
-        +int price
-        +String description
-    }
-    class CartItem {
-        +Ticket ticket
-        +int quantity
-        +String option
-        +getSubTotal() int
-    }
-    class Cart {
-        +List~CartItem~ items
-        +int totalAmount
-        +addItem(ticket, qty, option)
-        +removeItem(ticketId)
-        +calculateTotal() int
-    }
-    class QRCodeGenerator {
-        +String formatData
-        +generateQR(Cart) Image
+    class CATALOG {
+        <<Global Dictionary>>
+        +dict T001
+        +dict T002
+        +dict T003
     }
 
-    Cart "1" *-- "*" CartItem : contains
-    CartItem "1" o-- "1" Ticket : refers to
-    QRCodeGenerator ..> Cart : uses
+    class CartItem {
+        <<Dictionary>>
+        +String ticket_id
+        +String name
+        +int price
+        +int quantity
+        +String option
+        +int subtotal
+    }
+
+    class Cart {
+        +List~dict~ items
+        +add_item(ticket_id, quantity, option)
+        +remove_item(ticket_id, quantity)
+        +clear_cart()
+        +get_total() int
+        +display_cart()
+        +export_data() String
+    }
+
+    class QRCodeModule {
+        <<Module>>
+        +generate_qr_from_json(json_data, output_filename)
+    }
+
+    Cart "1" *-- "*" CartItem : itemsリスト内に保持
+    Cart ..> CATALOG : ticket_idで参照
+    Cart ..> QRCodeModule : export_data()で生成したJSONを渡す
