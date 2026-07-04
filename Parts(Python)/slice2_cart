@@ -70,9 +70,10 @@ class Cart:
             "total_amount": self.get_total()
         }
         return json.dumps(data, ensure_ascii=False)
+cart = Cart(        
 
 if __name__ == "__main__":
     # 縦切り2の動作確認
     display_catalog() 
     
-    cart = Cart()
+  )
