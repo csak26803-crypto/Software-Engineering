@@ -1,27 +1,45 @@
 import streamlit as st
 import json
 import os
+import sys
 
 # 画面のタイトル
 st.title("🎟️ チケット購入 & QRコード生成システム")
 
 # ------------------------------------------------------------------
-# 直接 CATALOG データを定義（文字化け・読み込み失敗対策）
+# 【完璧な対策】元のファイルをテキストとしてUTF-8で強制的に読み込む
 # ------------------------------------------------------------------
-CATALOG = {
-    "T001": {"name": "大人チケット", "price": 2000, "desc": "18歳以上対象"},
-    "T002": {"name": "子供チケット", "price": 1000, "desc": "小学生〜高校生対象"},
-    "T003": {"name": "シニアチケット", "price": 1500, "desc": "65歳以上対象"}
-}
+@st.cache_data
+def load_catalog_safely():
+    """元のファイルをUTF-8として安全に読み込み、CATALOG辞書を復元する"""
+    catalog_path = "slice1_catalog.py"
+    local_vars = {}
+    try:
+        with open(catalog_path, "r", encoding="utf-8") as f:
+            code = f.read()
+        # ファイル内の「CATALOG = {...}」の部分を実行して辞書を取得する
+        exec(code, {}, local_vars)
+        if "CATALOG" in local_vars:
+            return local_vars["CATALOG"]
+    except Exception:
+        pass
+    
+    # 万が一読み込めなかった場合のバックアップ
+    return {
+        "T001": {"name": "大人チケット", "price": 2000, "desc": "18歳以上対象"},
+        "T002": {"name": "子供チケット", "price": 1000, "desc": "小学生〜高校生対象"},
+        "T003": {"name": "シニアチケット", "price": 1500, "desc": "65歳以上対象"}
+    }
+
+# 安全に最新のカタログデータを取得
+CATALOG = load_catalog_safely()
 
 # ------------------------------------------------------------------
-# セッション状態の初期化
+# セッション状態の初期化 (slice2_cartのクラスを使用)
 # ------------------------------------------------------------------
-# Cartクラスのインポートでエラーが出ないよう安全に処理
 try:
     from slice2_cart import Cart
 except ImportError:
-    # 万が一インポートに失敗した場合の簡易Cartクラス
     class Cart:
         def __init__(self): self.items = []
         def add_item(self, tid, qty):
@@ -41,10 +59,10 @@ cart = st.session_state.cart
 # ------------------------------------------------------------------
 st.header("1. チケットを選択")
 
-# 選択肢の文字を組み立て
+# カタログデータ（学割などが追加されても自動反映）から選択肢をループ生成
 options = {}
 for ticket_id, info in CATALOG.items():
-    # 「大人チケット (¥2000) [18歳以上対象]」 という見た目にする
+    # 「大人チケット (¥2000) — 18歳以上対象」の形で綺麗に表示
     label = f"{info['name']} (¥{info['price']}) — {info['desc']}"
     options[label] = ticket_id
 
@@ -68,7 +86,7 @@ if not cart.items:
     st.info("カートは空です。")
 else:
     for item in cart.items:
-        # 説明文をCATALOGから安全に取得
+        # 説明文（desc）もカタログから引っ張ってきて表示
         item_desc = CATALOG.get(item['ticket_id'], {}).get('desc', '')
         st.write(f"・ **{item['name']}** x{item['quantity']} — ¥{item['subtotal']} 🏷️ *({item_desc})*")
     
@@ -87,7 +105,6 @@ if cart.items:
     if st.button("✨ 注文を確定する"):
         order_json = cart.export_data()
         
-        # QRコード生成関数の呼び出し
         try:
             from slice3_qrcode import generate_qr_from_json
             filename = "final_ticket_qr.png"
