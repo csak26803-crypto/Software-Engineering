@@ -3,7 +3,7 @@ classDiagram
         <<Global Dictionary>>
         +dict T001
         +dict T002
-        +dict T003
+        +dict T003...
     }
 
     class CartItem {
@@ -31,6 +31,13 @@ classDiagram
         +generate_qr_from_json(json_data, output_filename)
     }
 
+    class AppModule {
+        <<Streamlit Web App>>
+        +load_catalog_safely()
+        +st.session_state
+    }
+
+    AppModule --> CATALOG : load_catalog_safely()で取得
+    AppModule *-- Cart : st.session_state.cart として保持
     Cart "1" *-- "*" CartItem : itemsリスト内に保持
-    Cart ..> CATALOG : ticket_idで参照
-    Cart ..> QRCodeModule : export_data()で生成したJSONを渡す
+    AppModule ..> QRCodeModule : 注文確定時に呼び出し
