@@ -1,23 +1,26 @@
 flowchart TD
     %% オブジェクトの定義
-    Main((利用者\nMainスクリプト))
+    Main((利用者\nStreamlit Webアプリ))
     Catalog[カタログモジュール\nslice1_catalog]
     CartObj[カートオブジェクト\nslice2_cart.Cart]
     QRModule[QR生成モジュール\nslice3_qrcode]
     OS[(ファイルシステム\nOS)]
 
     %% メッセージのやり取り（番号順）
-    Main -- "1: display_catalog()" --> Catalog
+    Main -- "1: load_catalog_safely() (exec実行)" --> Catalog
+    Catalog -- "1.1: CATALOG辞書を返却" --> Main
     
-    Main -- "2: add_item(ID, Qty)" --> CartObj
+    Main -- "2: [UI操作] add_item(ID, Qty)" --> CartObj
     CartObj -- "2.1: ID検索・データ参照" --> Catalog
     
-    Main -- "3: export_data()" --> CartObj
+    Main -- "3: [UI操作] export_data()" --> CartObj
     CartObj -- "3.1: JSON文字列(戻り値)" --> Main
     
     Main -- "4: generate_qr_from_json(JSON)" --> QRModule
     QRModule -- "4.1: os.makedirs(QRcodefolder)" --> OS
     QRModule -- "4.2: img.save(画像パス)" --> OS
+    
+    Main -- "5: st.image(画像パス)" --> Main
 
     %% スタイル設定
     classDef object fill:#0f172a,stroke:#4ade80,stroke-width:2px,color:#fff;
