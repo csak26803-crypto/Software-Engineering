@@ -5,10 +5,6 @@ CATALOG = {
     "T003": {"name": "シニアチケット", "price": 1500, "desc": "65歳以上対象"}
 }
 
-# 2. 【ここがポイント！】大文字のデータを自動的に小文字のIDにも紐付け（同期）します
-CATALOG["t001"] = CATALOG["T001"]
-CATALOG["t002"] = CATALOG["T002"]
-CATALOG["t003"] = CATALOG["T003"]
 
 # 3. 並び替え機能を追加した表示関数
 def display_catalog():
