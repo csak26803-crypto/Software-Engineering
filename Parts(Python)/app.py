@@ -8,9 +8,6 @@ from slice3_qrcode import generate_qr_from_json
 # 画面のタイトル
 st.title("🎟️ チケット購入 & QRコード生成システム")
 
-# ------------------------------------------------------------------
-# セッション状態の初期化 (Streamlitでカート状態を保持するために必要)
-# ------------------------------------------------------------------
 if "cart" not in st.session_state:
     st.session_state.cart = Cart()
 
@@ -21,8 +18,8 @@ cart = st.session_state.cart
 # ------------------------------------------------------------------
 st.header("1. チケットを選択")
 
-# 選択肢の作成
-options = {f"{info['name']} (¥{info['price']})": ticket_id for ticket_id, info in CATALOG.items()}
+# 💡 選択肢の表示を 「名前 (価格) - 説明文」 に変更しました！
+options = {f"{info['name']} (¥{info['price']}) — {info['desc']}": ticket_id for ticket_id, info in CATALOG.items()}
 selected_ticket_name = st.selectbox("チケットの種類を選んでください", list(options.keys()))
 selected_id = options[selected_ticket_name]
 
@@ -42,13 +39,14 @@ st.header("2. 現在のカート内容")
 if not cart.items:
     st.info("カートは空です。")
 else:
-    # カートの中身をテーブルっぽく表示
+    # 💡 カート内にも説明文（desc）を表示するようにしました
     for item in cart.items:
-        st.write(f"・ **{item['name']}** x{item['quantity']} — ¥{item['subtotal']}")
+        # CATALOGから説明文を引っ張ってくる
+        item_desc = CATALOG[item['ticket_id']]['desc']
+        st.write(f"・ **{item['name']}** x{item['quantity']} — ¥{item['subtotal']} 🏷️ *({item_desc})*")
     
     st.metric(label="合計金額", value=f"¥{cart.get_total()}")
 
-    # カートを空にするボタン
     if st.button("🗑️ カートを空にする"):
         cart.clear_cart()
         st.rerun()
@@ -62,11 +60,9 @@ if cart.items:
     if st.button("✨ 注文を確定する"):
         order_json = cart.export_data()
         
-        # QRコードのファイル名を設定して生成
         filename = "final_ticket_qr.png"
         generate_qr_from_json(order_json, filename)
         
-        # 生成された画像を表示する
         qr_path = os.path.join("QRcodefolder", filename)
         if os.path.exists(qr_path):
             st.success("🎉 注文が確定しました！QRコードを提示してください。")
