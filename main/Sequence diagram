@@ -1,38 +1,45 @@
 sequenceDiagram
-    actor User as 利用者 (Mainスクリプト)
+    actor User as 利用者 (ブラウザ)
+    participant App as app.py (Streamlit)
     participant Catalog as slice1_catalog
-    participant Cart as slice2_cart (Cart)
+    participant Cart as session_state.cart
     participant QRGen as slice3_qrcode
-    participant OS as ファイルシステム (OS)
+    participant OS as ファイルシステム
 
-    %% カタログ表示フロー
-    User->>Catalog: display_catalog() を呼び出し
-    Note right of Catalog: CATALOG辞書を小文字基準で<br>ソートしてループ処理
-    Catalog-->>User: 商品一覧をコンソール表示 (print)
+    %% アプリ起動・カタログ読み込み
+    User->>App: アプリにアクセス
+    App->>Catalog: load_catalog_safely() (UTF-8で安全に読込)
+    Catalog-->>App: CATALOG辞書を返却
+    App-->>User: 1. チケット選択画面を表示 (selectbox)
     
     %% カートへの追加フロー
-    User->>Cart: add_item("T001", 2, "なし") を呼び出し
-    Cart->>Catalog: CATALOG内にIDが存在するか確認
-    Catalog-->>Cart: 商品情報（価格など）を取得
-    Note right of Cart: self.itemsに辞書を追加し<br>小計(subtotal)を計算
-    Cart-->>User: 追加完了メッセージをコンソール表示 (print)
+    User->>App: 「🛒 カートに追加」ボタンをクリック
+    App->>Cart: add_item(ID, Qty) を呼び出し
+    Cart-->>App: 内部状態(itemsリスト)を更新
+    App-->>User: st.success で追加完了メッセージを表示
     
-    %% カート内容の確認フロー
-    User->>Cart: display_cart() を呼び出し
-    Cart->>Cart: get_total() で合計金額を計算
-    Cart-->>User: カート一覧と合計金額をコンソール表示 (print)
+    %% カート内容の確認とクリア
+    App->>Cart: get_total() で合計を取得
+    App-->>User: 2. カートの中身と合計金額を表示 (st.write / st.metric)
     
-    %% データエクスポートとQR生成フロー
-    User->>Cart: export_data() を呼び出し
-    Note right of Cart: 日本語対応で<br>json.dumps()を実行
-    Cart-->>User: json_data (JSON形式の文字列) を返却
-    
-    User->>QRGen: generate_qr_from_json(json_data, "ticket_qr.png") を呼び出し
-    QRGen->>OS: os.path.exists("QRcodefolder") でフォルダ確認
-    alt フォルダが存在しない場合
-        QRGen->>OS: os.makedirs("QRcodefolder") で新規作成
+    opt カートを空にする場合
+        User->>App: 「🗑️ カートを空にする」ボタンをクリック
+        App->>Cart: clear_cart()
+        App->>App: st.rerun() で画面を再描画
     end
     
-    Note right of QRGen: qrcodeモジュールで<br>画像データをメモリ上に生成
-    QRGen->>OS: img.save("QRcodefolder/ticket_qr.png") で保存
-    QRGen-->>User: 保存完了メッセージをコンソール表示 (print)
+    %% データエクスポートとQR生成・表示フロー
+    User->>App: 「✨ 注文を確定する」ボタンをクリック
+    App->>Cart: export_data() を呼び出し
+    Cart-->>App: JSON文字列を返却
+    
+    App->>QRGen: generate_qr_from_json(json_data, "final_ticket_qr.png")
+    QRGen->>OS: os.path.exists("QRcodefolder") で確認
+    alt フォルダが存在しない
+        QRGen->>OS: os.makedirs("QRcodefolder")
+    end
+    QRGen->>OS: img.save("QRcodefolder/final_ticket_qr.png")
+    QRGen-->>App: 保存完了
+    
+    App->>OS: os.path.exists() で画像の存在確認
+    App-->>User: 3. st.success と st.image でQRコードを画面に表示
