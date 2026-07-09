@@ -23,23 +23,35 @@ class Cart:
         else:
             print(f"エラー: 商品ID '{ticket_id}' は存在しません。")
 
+    # ▼▼▼【Streamlit用に新しく追記するメソッド 1】▼▼▼
+    def update_quantity(self, index, new_qty):
+        """指定したインデックス（〇番目）の枚数と小計を直接更新する"""
+        if 0 <= index < len(self.items):
+            item = self.items[index]
+            item["quantity"] = new_qty
+            item["subtotal"] = item["price"] * new_qty
+            print(f" -> {item['name']}の枚数を {new_qty} 枚に変更しました。")
+
+    # ▼▼▼【Streamlit用に新しく追記するメソッド 2】▼▼▼
+    def remove_item_by_index(self, index):
+        """指定したインデックス（〇番目）のアイテムを完全に削除する"""
+        if 0 <= index < len(self.items):
+            removed = self.items.pop(index)
+            print(f" -> {removed['name']}をカートから削除しました。")
+
     def remove_item(self, ticket_id, quantity):
-        """【追加機能】指定した商品IDの数量を、任意の数だけ減らす"""
-        # カート内から指定された商品IDを探す
+        """【追加機能】指定した商品IDの数量を、任意の数だけ減らす（CUI用）"""
+        # ... (既存のコードのまま変更なし) ...
         for item in self.items:
             if item["ticket_id"] == ticket_id:
                 if item["quantity"] > quantity:
-                    # 指定された数よりカート内の残りが多い場合：数量と小計を減らす
                     item["quantity"] -= quantity
                     item["subtotal"] = item["price"] * item["quantity"]
                     print(f" -> {item['name']}を{quantity}枚減らしました。")
                 else:
-                    # カート内の数と同じか、それ以上減らそうとした場合：完全に削除
                     self.items.remove(item)
                     print(f" -> {item['name']}がカートから完全になくなりました。")
                 return
-        
-        # カートにその商品が入っていなかった場合
         print(f"エラー: カート内に商品ID '{ticket_id}' は見つかりません。")
 
     def clear_cart(self):
@@ -69,13 +81,9 @@ class Cart:
             "items": self.items,
             "total_amount": self.get_total()
         }
-        
         return json.dumps(data, ensure_ascii=False)
         
 cart = Cart()
 
 if __name__ == "__main__":
-    # 縦切り2の動作確認
-    display_catalog() 
-    
-  
+    display_catalog()  
