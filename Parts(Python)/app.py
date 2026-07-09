@@ -145,7 +145,7 @@ else:
         with col3:
             # 個別削除ボタン
             if st.button("❌", key=f"del_{i}"):
-                cart.remove_item(i)
+                cart.remove_item_by_index(i)
                 st.rerun()
                 
     st.write("---")
