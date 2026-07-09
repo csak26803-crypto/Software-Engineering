@@ -45,9 +45,37 @@ try:
 except ImportError:
     class Cart:
         def __init__(self): self.items = []
+        
         def add_item(self, tid, qty):
+            # 既にカートに同じチケットがある場合は枚数を合算する
+            for item in self.items:
+                if item["ticket_id"] == tid:
+                    item["quantity"] += qty
+                    item["subtotal"] = item["price"] * item["quantity"]
+                    return
+            
+            # まだカートにない場合は新規追加
             if tid in CATALOG:
-                self.items.append({"ticket_id": tid, "name": CATALOG[tid]["name"], "price": CATALOG[tid]["price"], "quantity": qty, "subtotal": CATALOG[tid]["price"] * qty})
+                self.items.append({
+                    "ticket_id": tid, 
+                    "name": CATALOG[tid]["name"], 
+                    "price": CATALOG[tid]["price"], 
+                    "quantity": qty, 
+                    "subtotal": CATALOG[tid]["price"] * qty
+                })
+                
+        def update_quantity(self, index, new_qty):
+            # 指定したインデックスの枚数を更新する
+            if 0 <= index < len(self.items):
+                item = self.items[index]
+                item["quantity"] = new_qty
+                item["subtotal"] = item["price"] * new_qty
+                
+        def remove_item(self, index):
+            # 指定したインデックスのアイテムを削除する
+            if 0 <= index < len(self.items):
+                self.items.pop(index)
+                
         def clear_cart(self): self.items = []
         def get_total(self): return sum(i["subtotal"] for i in self.items)
         def export_data(self): return json.dumps({"items": self.items, "total_amount": self.get_total()}, ensure_ascii=False)
@@ -88,11 +116,39 @@ st.header("2. 現在のカート内容")
 if not cart.items:
     st.info("カートは空です。")
 else:
-    for item in cart.items:
-        # 説明文（desc）もカタログから引っ張ってきて表示
+    # リストのインデックス(i)を取得するためにenumerateを使用
+    for i, item in enumerate(cart.items):
         item_desc = CATALOG.get(item['ticket_id'], {}).get('desc', '')
-        st.write(f"・ **{item['name']}** x{item['quantity']} — ¥{item['subtotal']} 🏷️ *({item_desc})*")
-    
+        
+        # 画面を3つのカラムに分割（商品情報 : 枚数変更 : 削除ボタン = 4 : 2 : 1 の比率）
+        col1, col2, col3 = st.columns([4, 2, 1])
+        
+        with col1:
+            st.write(f"・ **{item['name']}** — ¥{item['price']} 🏷️ *({item_desc})*")
+            st.write(f" 小計: ¥{item['subtotal']}")
+        
+        with col2:
+            # Streamlitの仕様上、ループ内で入力ウィジェットを出す場合は一意の key が必須
+            new_qty = st.number_input(
+                "枚数", 
+                min_value=1, 
+                max_value=20, # 必要に応じて上限を変更してください
+                value=item['quantity'], 
+                key=f"qty_{i}",
+                label_visibility="collapsed"
+            )
+            # ユーザーが枚数を変更した瞬間に検知してカートを更新
+            if new_qty != item['quantity']:
+                cart.update_quantity(i, new_qty)
+                st.rerun() # 画面を再描画して小計や合計金額を即時反映
+                
+        with col3:
+            # 個別削除ボタン
+            if st.button("❌", key=f"del_{i}"):
+                cart.remove_item(i)
+                st.rerun()
+                
+    st.write("---")
     st.metric(label="合計金額", value=f"¥{cart.get_total()}")
 
     if st.button("🗑️ カートを空にする"):
