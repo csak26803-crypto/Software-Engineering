@@ -1,21 +1,18 @@
 flowchart LR
     %% アクターの定義
-    User((利用者\nユーザー))
+    User(("利用者<br>ユーザー"))
 
     %% システム境界
-    subgraph Ticket_Cart_System [チケット購入 Webシステム (Streamlit)]
+    subgraph Ticket_Cart_System ["チケット購入 Webシステム (Streamlit)"]
         direction TB
-        UC1([チケットの種類と枚数を選ぶ\nst.selectbox / number_input])
-        
-        UC2([商品をカートに追加する\nadd_item])
-        UC4([カートを空にする\nclear_cart])
-        UC5([カート内容と合計を確認\nst.write / metric])
-        
-        UC6([注文を確定しQRコードを発行\ngenerate_qr_from_json])
-      
-        UC7([JSONデータを出力する\nexport_data])
-        UC8([保存フォルダを自動作成する\nos.makedirs])
-        UC9([カタログデータを安全に読み込む\nload_catalog_safely])
+        UC1(["チケットの種類と枚数を選ぶ<br>st.selectbox / number_input"])
+        UC2(["商品をカートに追加する<br>add_item"])
+        UC4(["カートを空にする<br>clear_cart"])
+        UC5(["カート内容と合計を確認<br>st.write / metric"])
+        UC6(["注文を確定しQRコードを発行<br>generate_qr_from_json"])
+        UC7(["JSONデータを出力する<br>export_data"])
+        UC8(["保存フォルダを自動作成する<br>os.makedirs"])
+        UC9(["カタログデータを安全に読み込む<br>load_catalog_safely"])
     end
 
     %% アクターとユースケースの関連
@@ -26,9 +23,9 @@ flowchart LR
     User --> UC6
 
     %% ユースケース間の関係（Include：包含）
-    UC1 -. "<< include >>" .-> UC9
-    UC6 -. "<< include >>" .-> UC7
-    UC6 -. "<< include >>" .-> UC8
+    UC1 -.->|"<< include >>"| UC9
+    UC6 -.->|"<< include >>"| UC7
+    UC6 -.->|"<< include >>"| UC8
 
     %% スタイル設定
     classDef usecase fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
